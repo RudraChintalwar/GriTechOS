@@ -10,6 +10,19 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/python-api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path: string) => path.replace(/^\/python-api/, "/api"),
+      },
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [react()],
   resolve: {

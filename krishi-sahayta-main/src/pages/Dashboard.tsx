@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import AppNavbar from "@/components/app/AppNavbar";
 import ProfileStep from "@/components/app/ProfileStep";
 import MatchingStep from "@/components/app/MatchingStep";
 import SchemesStep from "@/components/app/SchemesStep";
 import ChatAssistant from "@/components/app/ChatAssistant";
+import { schemesData } from "@/data/schemesData";
+import { matchSchemes, MatchedScheme } from "@/lib/schemeEngine";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { db } from "@/lib/firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-const steps = [
-  { id: 1, name: "Profile", description: "Tell us about yourself" },
-  { id: 2, name: "Matching", description: "Finding your schemes" },
-  { id: 3, name: "Schemes", description: "Your recommendations" },
-];
+
 
 export interface FarmerProfile {
-  state: string;
   district: string;
   farmerType: string;
   landOwnership: string;
@@ -24,9 +24,16 @@ export interface FarmerProfile {
 }
 
 const Dashboard = () => {
+  const { t, language } = useLanguage();
+
+  const steps = [
+    { id: 1, name: t("dashboard.profile"), description: t("dashboard.profileDesc") },
+    { id: 2, name: t("dashboard.matching"), description: t("dashboard.matchingDesc") },
+    { id: 3, name: t("dashboard.schemes"), description: t("dashboard.schemesDesc") },
+  ];
+
   const [currentStep, setCurrentStep] = useState(1);
   const [profile, setProfile] = useState<FarmerProfile>({
-    state: "",
     district: "",
     farmerType: "",
     landOwnership: "",
@@ -34,116 +41,74 @@ const Dashboard = () => {
     crops: [],
     requirements: [],
   });
-  const [matchedSchemes, setMatchedSchemes] = useState<any[]>([]);
+  const [matchedSchemes, setMatchedSchemes] = useState<MatchedScheme[]>([]);
   const [isMatching, setIsMatching] = useState(false);
+  const { user } = useAuth();
 
-  const handleProfileComplete = (data: FarmerProfile) => {
+
+  // Load saved profile on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      try {
+        const profileRef = doc(db, "users", user.uid);
+        const profileSnap = await getDoc(profileRef);
+        if (profileSnap.exists()) {
+          const savedProfile = profileSnap.data().profile as FarmerProfile;
+          if (savedProfile && savedProfile.farmerType) {
+            setProfile(savedProfile);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading profile:", err);
+      }
+    };
+    loadProfile();
+  }, [user]);
+
+  // Re-run matching when language changes (to update scheme text)
+  useEffect(() => {
+    if (currentStep === 3 && profile.farmerType) {
+      const results = matchSchemes(profile, schemesData, language);
+      setMatchedSchemes(results);
+    }
+  }, [language]);
+
+  const handleProfileComplete = async (data: FarmerProfile) => {
     setProfile(data);
     setCurrentStep(2);
     setIsMatching(true);
-    
-    // Simulate matching process
-    setTimeout(() => {
-      setIsMatching(false);
-      setMatchedSchemes(getMatchedSchemes(data));
-      setCurrentStep(3);
-    }, 3000);
-  };
 
-  const getMatchedSchemes = (data: FarmerProfile) => {
-    // Rule-based matching logic
-    const schemes = [];
-    
-    if (data.farmerType === "small" || data.farmerType === "marginal") {
-      schemes.push({
-        id: 1,
-        name: "PM-KISAN",
-        fullName: "Pradhan Mantri Kisan Samman Nidhi",
-        benefit: "₹6,000/year",
-        confidence: 95,
-        category: "Income Support",
-        description: "Direct income support of ₹6,000 per year in three installments",
-        eligibility: ["Small/Marginal farmer", "Valid land records", "Aadhaar linked bank account"],
-        howToApply: "Apply through CSC or PM-KISAN portal with land documents",
-      });
+    // Save profile to Firestore
+    if (user) {
+      try {
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            profile: data,
+            phoneNumber: user.phoneNumber,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      } catch (err) {
+        console.error("Error saving profile:", err);
+      }
     }
-    
-    if (data.requirements.includes("insurance")) {
-      schemes.push({
-        id: 2,
-        name: "PMFBY",
-        fullName: "Pradhan Mantri Fasal Bima Yojana",
-        benefit: "Crop Insurance",
-        confidence: 88,
-        category: "Insurance",
-        description: "Comprehensive crop insurance against natural calamities",
-        eligibility: ["Crop cultivator", "Enrolled before sowing season", "Bank account required"],
-        howToApply: "Apply through bank or CSC within enrollment window",
-      });
-    }
-    
-    if (data.requirements.includes("irrigation") && data.landOwnership === "owned") {
-      schemes.push({
-        id: 3,
-        name: "PMKSY",
-        fullName: "Pradhan Mantri Krishi Sinchayee Yojana",
-        benefit: "Irrigation Subsidy",
-        confidence: 82,
-        category: "Irrigation",
-        description: "Subsidy for micro-irrigation and water harvesting",
-        eligibility: ["Land owner", "Agricultural land", "Valid land documents"],
-        howToApply: "Apply through state agriculture department",
-      });
-    }
-    
-    if (data.requirements.includes("credit")) {
-      schemes.push({
-        id: 4,
-        name: "KCC",
-        fullName: "Kisan Credit Card",
-        benefit: "Low-interest Loan",
-        confidence: 90,
-        category: "Credit",
-        description: "Credit facility up to ₹3 lakh at 4% interest",
-        eligibility: ["Farmer with land", "No loan default history", "Bank account"],
-        howToApply: "Apply at any scheduled bank with land documents",
-      });
-    }
-    
-    if (data.crops.includes("wheat") || data.crops.includes("rice")) {
-      schemes.push({
-        id: 5,
-        name: "MSP Procurement",
-        fullName: "Minimum Support Price",
-        benefit: "Guaranteed Price",
-        confidence: 85,
-        category: "Price Support",
-        description: "Government procurement at minimum support price",
-        eligibility: ["Cultivator of notified crops", "Registration on e-NAM"],
-        howToApply: "Register at local APMC mandi",
-      });
-    }
-    
-    // Add some default schemes
-    schemes.push({
-      id: 6,
-      name: "Soil Health Card",
-      fullName: "Soil Health Card Scheme",
-      benefit: "Free Soil Testing",
-      confidence: 100,
-      category: "Advisory",
-      description: "Free soil testing and fertilizer recommendations",
-      eligibility: ["Any farmer", "Agricultural land"],
-      howToApply: "Contact local Krishi Vigyan Kendra",
-    });
-    
-    return schemes;
+
+    // Run real rule-based matching
+    setTimeout(() => {
+      const results = matchSchemes(data, schemesData, language);
+      setIsMatching(false);
+      setMatchedSchemes(results);
+      setCurrentStep(3);
+    }, 2500);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <AppNavbar currentStep={currentStep} steps={steps} />
-      
+
       {/* Progress bar */}
       <div className="fixed top-20 left-0 right-0 z-40">
         <div className="container mx-auto px-4">
@@ -169,13 +134,13 @@ const Dashboard = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.5 }}
             >
-              <ProfileStep 
+              <ProfileStep
                 profile={profile}
-                onComplete={handleProfileComplete} 
+                onComplete={handleProfileComplete}
               />
             </motion.div>
           )}
-          
+
           {currentStep === 2 && (
             <motion.div
               key="matching"
@@ -184,13 +149,10 @@ const Dashboard = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.5 }}
             >
-              <MatchingStep 
-                profile={profile}
-                isMatching={isMatching}
-              />
+              <MatchingStep profile={profile} isMatching={isMatching} />
             </motion.div>
           )}
-          
+
           {currentStep === 3 && (
             <motion.div
               key="schemes"
@@ -199,7 +161,7 @@ const Dashboard = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.5 }}
             >
-              <SchemesStep 
+              <SchemesStep
                 schemes={matchedSchemes}
                 profile={profile}
                 onBack={() => setCurrentStep(1)}
@@ -211,7 +173,7 @@ const Dashboard = () => {
 
       {/* AI Assistant */}
       <ChatAssistant schemes={matchedSchemes} profile={profile} />
-      
+
       {/* Background elements */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
