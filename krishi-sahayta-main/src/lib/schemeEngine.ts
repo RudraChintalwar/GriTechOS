@@ -1,5 +1,4 @@
 import { SchemeData, cropMapping, requirementCategoryMapping } from "@/data/schemesData";
-import { schemeTranslations } from "@/data/schemesI18n";
 import { FarmerProfile } from "@/pages/Dashboard";
 import { Language } from "@/contexts/LanguageContext";
 
@@ -19,17 +18,18 @@ export interface MatchedScheme {
 
 /**
  * Resolve translated fields for a scheme.
- * Falls back to English when translation is missing.
+ * Uses the embedded i18n object from Firestore, falling back to raw fields.
  */
 function resolveI18n(scheme: SchemeData, lang: Language) {
-    const t = schemeTranslations[scheme.scheme_id];
-    if (t && t[lang]) {
-        return t[lang];
+    const i18n = scheme.i18n;
+    if (i18n && i18n[lang]) {
+        return i18n[lang]!;
     }
-    // Fallback to English translation, then raw scheme data
-    if (t && t.en) {
-        return t.en;
+    // Fallback to English translation
+    if (i18n && i18n.en) {
+        return i18n.en;
     }
+    // Final fallback: build from raw scheme fields
     return {
         name: scheme.scheme_name,
         benefit: scheme.benefit,

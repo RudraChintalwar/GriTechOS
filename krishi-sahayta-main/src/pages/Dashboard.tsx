@@ -5,12 +5,12 @@ import ProfileStep from "@/components/app/ProfileStep";
 import MatchingStep from "@/components/app/MatchingStep";
 import SchemesStep from "@/components/app/SchemesStep";
 import ChatAssistant from "@/components/app/ChatAssistant";
-import { schemesData } from "@/data/schemesData";
+import { SchemeData } from "@/data/schemesData";
 import { matchSchemes, MatchedScheme } from "@/lib/schemeEngine";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db } from "@/lib/firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
 
 
 
@@ -43,8 +43,23 @@ const Dashboard = () => {
   });
   const [matchedSchemes, setMatchedSchemes] = useState<MatchedScheme[]>([]);
   const [isMatching, setIsMatching] = useState(false);
+  const [allSchemes, setAllSchemes] = useState<SchemeData[]>([]);
   const { user } = useAuth();
 
+  // Load schemes from Firestore
+  useEffect(() => {
+    const loadSchemes = async () => {
+      try {
+        const snap = await getDocs(collection(db, "schemes"));
+        if (!snap.empty) {
+          setAllSchemes(snap.docs.map((d) => d.data() as SchemeData));
+        }
+      } catch (err) {
+        console.error("Error loading schemes:", err);
+      }
+    };
+    loadSchemes();
+  }, []);
 
   // Load saved profile on mount
   useEffect(() => {
@@ -69,10 +84,10 @@ const Dashboard = () => {
   // Re-run matching when language changes (to update scheme text)
   useEffect(() => {
     if (currentStep === 3 && profile.farmerType) {
-      const results = matchSchemes(profile, schemesData, language);
+      const results = matchSchemes(profile, allSchemes, language);
       setMatchedSchemes(results);
     }
-  }, [language]);
+  }, [language, allSchemes]);
 
   const handleProfileComplete = async (data: FarmerProfile) => {
     setProfile(data);
@@ -98,7 +113,7 @@ const Dashboard = () => {
 
     // Run real rule-based matching
     setTimeout(() => {
-      const results = matchSchemes(data, schemesData, language);
+      const results = matchSchemes(data, allSchemes, language);
       setIsMatching(false);
       setMatchedSchemes(results);
       setCurrentStep(3);

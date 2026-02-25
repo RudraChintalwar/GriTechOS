@@ -3,11 +3,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 
-interface ProtectedRouteProps {
+interface AdminProtectedRouteProps {
     children: React.ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
     const { user, userRole, loading } = useAuth();
 
     if (loading) {
@@ -27,12 +27,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         return <Navigate to="/auth" replace />;
     }
 
-    // Redirect admins to admin panel
-    if (userRole === "admin") {
-        return <Navigate to="/admin" replace />;
+    if (userRole !== "admin") {
+        return <Navigate to="/app" replace />;
     }
 
     return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default AdminProtectedRoute;

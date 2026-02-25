@@ -1,3 +1,11 @@
+/**
+ * Scheme type definition and matching-engine lookup tables.
+ * 
+ * The actual scheme data now lives in Firestore (collection: "schemes").
+ * This file only exports the TypeScript interface and the mapping
+ * dictionaries that the rule-based matching engine needs.
+ */
+
 export interface SchemeData {
     scheme_id: number;
     scheme_name: string;
@@ -10,205 +18,21 @@ export interface SchemeData {
     eligibility: string;
     required_documents: string[];
     application_link: string;
+    /** Embedded translations added when seeded / edited via admin panel */
+    i18n?: {
+        en?: SchemeI18nFields;
+        hi?: SchemeI18nFields;
+        mr?: SchemeI18nFields;
+    };
 }
 
-export const schemesData: SchemeData[] = [
-    {
-        scheme_id: 1,
-        scheme_name: "PM-KISAN Samman Nidhi",
-        state: "Maharashtra",
-        category: "Income Support",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Rs.6000 per year income support",
-        eligibility: "Farmer must own cultivable land",
-        required_documents: ["Aadhaar Card", "Land Records", "Bank Passbook"],
-        application_link: "https://pmkisan.gov.in/registrationnew.aspx",
-    },
-    {
-        scheme_id: 2,
-        scheme_name: "Namo Shetkari Mahasanman Nidhi Yojana",
-        state: "Maharashtra",
-        category: "Income Support",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Additional Rs.6000 state support",
-        eligibility: "Registered PM-KISAN beneficiary",
-        required_documents: ["Aadhaar Card", "Land Record", "Bank Details"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-    {
-        scheme_id: 3,
-        scheme_name: "Pradhan Mantri Fasal Bima Yojana",
-        state: "Maharashtra",
-        category: "Insurance",
-        farmer_type: ["All"],
-        land_ownership_required: false,
-        crop_type: ["Food Crops", "Oilseeds", "Commercial Crops"],
-        benefit: "Crop insurance against natural calamities",
-        eligibility: "Farmer cultivating notified crops",
-        required_documents: ["Aadhaar Card", "Bank Passbook", "Land or Lease Proof"],
-        application_link: "https://pmfby.gov.in",
-    },
-    {
-        scheme_id: 4,
-        scheme_name: "PM Krishi Sinchayee Yojana",
-        state: "Maharashtra",
-        category: "Irrigation",
-        farmer_type: ["All"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Subsidy for irrigation systems",
-        eligibility: "Farmer owning agricultural land",
-        required_documents: ["Land Record", "Aadhaar Card", "Bank Details"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-    {
-        scheme_id: 5,
-        scheme_name: "Magel Tyala Shettale Yojana",
-        state: "Maharashtra",
-        category: "Irrigation",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Farm pond construction subsidy",
-        eligibility: "Water-scarce area farmers",
-        required_documents: ["Land Documents", "Aadhaar Card"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-    {
-        scheme_id: 6,
-        scheme_name: "PM-KUSUM Solar Pump Scheme",
-        state: "Maharashtra",
-        category: "Solar",
-        farmer_type: ["All"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Subsidy for solar irrigation pumps",
-        eligibility: "Electricity or diesel pump users",
-        required_documents: ["Land Record", "Electricity Connection Proof"],
-        application_link: "https://pmkusum.mnre.gov.in",
-    },
-    {
-        scheme_id: 7,
-        scheme_name: "Magel Tyala Saur Krushi Pump",
-        state: "Maharashtra",
-        category: "Solar",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Solar pump installation subsidy",
-        eligibility: "Eligible Maharashtra farmers",
-        required_documents: ["Aadhaar", "Land Record"],
-        application_link: "https://www.mahadiscom.in/solar/Solar_Pump_Status/index.html",
-    },
-    {
-        scheme_id: 8,
-        scheme_name: "Sub-Mission on Agricultural Mechanization",
-        state: "Maharashtra",
-        category: "Machinery",
-        farmer_type: ["All"],
-        land_ownership_required: false,
-        crop_type: ["All"],
-        benefit: "Subsidy on farm equipment",
-        eligibility: "Registered farmer",
-        required_documents: ["Aadhaar Card", "Bank Details"],
-        application_link: "https://agrimachinery.nic.in/Logins/Registration.aspx",
-    },
-    {
-        scheme_id: 9,
-        scheme_name: "Bhausaheb Fundkar Phalbag Lagvad Yojana",
-        state: "Maharashtra",
-        category: "Horticulture",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["Fruits"],
-        benefit: "Subsidy for fruit plantation",
-        eligibility: "Farmers cultivating horticulture crops",
-        required_documents: ["Land Record", "Aadhaar Card"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-    {
-        scheme_id: 10,
-        scheme_name: "Rashtriya Krishi Vikas Yojana",
-        state: "Maharashtra",
-        category: "Development",
-        farmer_type: ["All"],
-        land_ownership_required: false,
-        crop_type: ["All"],
-        benefit: "Financial assistance for agriculture projects",
-        eligibility: "Agriculture-based activities",
-        required_documents: ["Project Proposal", "Identity Proof"],
-        application_link: "https://rkvy.nic.in",
-    },
-    {
-        scheme_id: 11,
-        scheme_name: "Dr. Babasaheb Ambedkar Krishi Swavalamban Yojana",
-        state: "Maharashtra",
-        category: "Irrigation",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Subsidy up to Rs 2.5 lakh for new wells, pump sets, and micro-irrigation",
-        eligibility: "Scheduled Caste (SC) or Neo-Buddhist farmers holding 0.40 to 6 hectares of land",
-        required_documents: ["Caste Certificate", "7/12 Extract", "Aadhaar Card", "Bank Passbook"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-    {
-        scheme_id: 12,
-        scheme_name: "Nanaji Deshmukh Krishi Sanjeevani Yojana (PoCRA)",
-        state: "Maharashtra",
-        category: "Development",
-        farmer_type: ["Small", "Marginal", "Medium"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Financial support for climate-resilient agriculture, shade nets, and drip irrigation",
-        eligibility: "Farmers residing in selected drought-prone villages of Maharashtra",
-        required_documents: ["Aadhaar Card", "7/12 Extract", "Bank Passbook"],
-        application_link: "https://dbt.mahapocra.gov.in/Home/Register",
-    },
-    {
-        scheme_id: 13,
-        scheme_name: "Gopinath Munde Shetkari Apghat Suraksha Sanugrah Anudan Yojana",
-        state: "Maharashtra",
-        category: "Insurance",
-        farmer_type: ["All"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Ex-gratia up to Rs 2 lakh for accidental death or disability",
-        eligibility: "Registered farmers and their family members in Maharashtra",
-        required_documents: ["7/12 Extract", "Aadhaar Card", "FIR/Police Report", "Medical/Death Certificate"],
-        application_link: "Offline via Taluka Agriculture Officer",
-    },
-    {
-        scheme_id: 14,
-        scheme_name: "Sharad Pawar Gram Samruddhi Yojana",
-        state: "Maharashtra",
-        category: "Livestock",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Subsidy of Rs 77,188 for cattle sheds, and grants for poultry/goat sheds",
-        eligibility: "Farmers holding an active MGNREGA job card",
-        required_documents: ["MGNREGA Job Card", "7/12 Extract", "Gram Panchayat Resolution", "Aadhaar Card"],
-        application_link: "Offline via Gram Panchayat",
-    },
-    {
-        scheme_id: 15,
-        scheme_name: "Birsa Munda Krishi Kranti Yojana",
-        state: "Maharashtra",
-        category: "Irrigation",
-        farmer_type: ["Small", "Marginal"],
-        land_ownership_required: true,
-        crop_type: ["All"],
-        benefit: "Financial assistance for new wells, old well repairs, and irrigation systems",
-        eligibility: "Scheduled Tribe (ST) farmers holding 0.40 to 6 hectares of land",
-        required_documents: ["Caste Certificate", "7/12 Extract", "Aadhaar Card", "Bank Passbook"],
-        application_link: "https://mahadbt.maharashtra.gov.in/Farmer/Login/Login",
-    },
-];
+export interface SchemeI18nFields {
+    name: string;
+    benefit: string;
+    eligibility: string;
+    documents: string[];
+    howToApply: string;
+}
 
 // Mapping from profile crop IDs to scheme crop_type values
 export const cropMapping: Record<string, string[]> = {
