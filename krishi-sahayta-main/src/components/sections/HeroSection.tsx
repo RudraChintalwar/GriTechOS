@@ -1,20 +1,17 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { ArrowDown, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Scene3D from "../Scene3D";
 import ParticleField from "../ParticleField";
-
-const problemCards = [
-  { text: "Too many schemes", delay: 0 },
-  { text: "No clarity", delay: 0.2 },
-  { text: "Complex eligibility", delay: 0.4 },
-  { text: "Information overload", delay: 0.6 },
-  { text: "Language barriers", delay: 0.8 },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HeroSection = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -23,6 +20,14 @@ const HeroSection = () => {
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
+
+  const problemCards = [
+    { text: t("hero.problem1"), delay: 0 },
+    { text: t("hero.problem2"), delay: 0.2 },
+    { text: t("hero.problem3"), delay: 0.4 },
+    { text: t("hero.problem4"), delay: 0.6 },
+    { text: t("hero.problem5"), delay: 0.8 },
+  ];
 
   return (
     <section
@@ -34,10 +39,10 @@ const HeroSection = () => {
       <div className="noise-overlay" />
       <ParticleField />
       <Scene3D />
-      
+
       {/* Radial glow */}
       <div className="absolute inset-0 bg-gradient-glow pointer-events-none" />
-      
+
       {/* Animated grid lines */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -49,7 +54,7 @@ const HeroSection = () => {
         }} />
       </div>
 
-      <motion.div 
+      <motion.div
         style={{ y, opacity, scale }}
         className="relative z-10 container mx-auto px-4 text-center"
       >
@@ -59,7 +64,7 @@ const HeroSection = () => {
             <motion.div
               key={card.text}
               initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ 
+              animate={{
                 opacity: [0, 1, 1, 0],
                 scale: [0.5, 1, 1, 0.5],
                 x: Math.sin(index * 1.5) * 200,
@@ -100,7 +105,7 @@ const HeroSection = () => {
           >
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
-              Intelligent Scheme Discovery
+              {t("hero.badge")}
             </span>
           </motion.div>
 
@@ -112,20 +117,20 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="text-5xl md:text-7xl lg:text-8xl font-bold font-display leading-tight"
             >
-              <span className="text-foreground">Government schemes exist.</span>
+              <span className="text-foreground">{t("hero.title1")}</span>
               <br />
               <span className="text-gradient">
-                But they don't reach the farmer.
+                {t("hero.title2")}
               </span>
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
               className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto"
             >
-              Until now.
+              {t("hero.subtitle")}
             </motion.p>
           </div>
 
@@ -136,31 +141,33 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 1 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
           >
-            <Link to="/app">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-hero group"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  See How We Fix This
-                  <motion.span
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    →
-                  </motion.span>
-                </span>
-              </motion.button>
-            </Link>
-            
             <motion.button
+              onClick={() => navigate("/app")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="btn-secondary"
+              className="btn-hero group"
             >
-              Watch Demo
+              <span className="relative z-10 flex items-center gap-2">
+                {t("hero.cta")}
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  →
+                </motion.span>
+              </span>
             </motion.button>
+
+            {user && (
+              <motion.button
+                onClick={() => navigate("/profile")}
+                className="px-8 py-4 rounded-full glass-card hover:bg-white/10 text-foreground font-semibold flex items-center gap-2 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {t("profile.updateProfile")}
+              </motion.button>
+            )}
           </motion.div>
         </motion.div>
 
@@ -176,7 +183,7 @@ const HeroSection = () => {
             transition={{ duration: 2, repeat: Infinity }}
             className="flex flex-col items-center gap-2 text-muted-foreground"
           >
-            <span className="text-sm">Scroll to explore</span>
+            <span className="text-sm">{t("hero.scroll")}</span>
             <ArrowDown className="w-5 h-5" />
           </motion.div>
         </motion.div>

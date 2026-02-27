@@ -10,6 +10,13 @@ import {
     CheckCircle,
     Tractor,
     Settings,
+    MapPin,
+    Sprout,
+    Wheat,
+    Home,
+    Users,
+    CircleDot,
+    ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -21,10 +28,25 @@ import {
 } from "@/contexts/AuthContext";
 import { RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "@/components/LanguageSelector";
+import { db } from "@/lib/firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { getDistrictName } from "@/i18n/districtTranslations";
 
 type Role = "farmer" | "admin";
 type AuthMethod = "phone" | "email";
-type Step = "role" | "method" | "phone" | "otp" | "email";
+type Step = "role" | "method" | "phone" | "otp" | "email" | "farmerProfile";
+
+const districts = [
+    "Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed",
+    "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli",
+    "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur",
+    "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded",
+    "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani",
+    "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara",
+    "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim",
+    "Yavatmal",
+];
 
 const AuthPage = () => {
     const [role, setRole] = useState<Role | null>(null);
@@ -48,16 +70,46 @@ const AuthPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    // Farmer profile (collected during signup)
+    const [profileSection, setProfileSection] = useState(0);
+    const [profileData, setProfileData] = useState({
+        district: "",
+        farmerType: "",
+        landOwnership: "",
+        crops: [] as string[],
+    });
+
     const navigate = useNavigate();
     const { user, userRole, signUpWithEmail, signInWithEmail } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
-    // Redirect if already logged in
+    // Redirect if logged in — but NOT if on profile step
     useEffect(() => {
-        if (user && userRole) {
-            navigate(userRole === "admin" ? "/admin" : "/app", { replace: true });
+        if (user && userRole && step !== "farmerProfile") {
+            // Check if farmer already has profile
+            if (userRole === "farmer") {
+                const checkProfile = async () => {
+                    try {
+                        const snap = await getDoc(doc(db, "users", user.uid));
+                        if (snap.exists() && snap.data().profile?.farmerType) {
+                            navigate("/app", { replace: true });
+                        } else if (!isSignUp) {
+                            // Login but no profile — go to app anyway
+                            navigate("/app", { replace: true });
+                        } else {
+                            // New signup — show profile step
+                            setStep("farmerProfile");
+                        }
+                    } catch {
+                        navigate("/app", { replace: true });
+                    }
+                };
+                checkProfile();
+            } else {
+                navigate("/admin", { replace: true });
+            }
         }
-    }, [user, userRole, navigate]);
+    }, [user, userRole]);
 
     // Set up reCAPTCHA verifier once on mount
     useEffect(() => {
@@ -142,7 +194,7 @@ const AuthPage = () => {
                 role!,
                 role === "admin" ? adminCode : undefined
             );
-            navigate(role === "admin" ? "/admin" : "/app", { replace: true });
+            // Auth state change will handle redirect via useEffect
         } catch (err: any) {
             console.error("OTP verify error:", err);
             if (err.message?.includes("admin code")) {
@@ -232,6 +284,65 @@ const AuthPage = () => {
         }
     };
 
+    const handleSaveProfile = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            await setDoc(
+                doc(db, "users", user.uid),
+                {
+                    profile: {
+                        district: profileData.district,
+                        farmerType: profileData.farmerType,
+                        landOwnership: profileData.landOwnership,
+                        landSize: 0,
+                        crops: profileData.crops,
+                        requirements: [],
+                    },
+                    updatedAt: new Date().toISOString(),
+                },
+                { merge: true }
+            );
+            navigate("/app", { replace: true });
+        } catch (err) {
+            console.error("Error saving profile:", err);
+            navigate("/app", { replace: true });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const profileCanProceed = () => {
+        if (profileSection === 0) return profileData.district !== "";
+        if (profileSection === 1) return profileData.farmerType !== "" && profileData.landOwnership !== "";
+        if (profileSection === 2) return profileData.crops.length > 0;
+        return false;
+    };
+
+    const farmerTypes = [
+        { id: "marginal", label: t("profile.marginal"), icon: Sprout, description: t("profile.marginalDesc") },
+        { id: "small", label: t("profile.small"), icon: Leaf, description: t("profile.smallDesc") },
+        { id: "medium", label: t("profile.medium"), icon: Tractor, description: t("profile.mediumDesc") },
+        { id: "large", label: t("profile.large"), icon: Wheat, description: t("profile.largeDesc") },
+    ];
+
+    const landOptions = [
+        { id: "owned", label: t("profile.owned"), icon: Home },
+        { id: "leased", label: t("profile.leased"), icon: Users },
+        { id: "both", label: t("profile.both"), icon: CircleDot },
+    ];
+
+    const crops = [
+        { id: "wheat", label: t("profile.wheat"), emoji: "🌾" },
+        { id: "rice", label: t("profile.rice"), emoji: "🍚" },
+        { id: "cotton", label: t("profile.cotton"), emoji: "🌿" },
+        { id: "sugarcane", label: t("profile.sugarcane"), emoji: "🎋" },
+        { id: "vegetables", label: t("profile.vegetables"), emoji: "🥬" },
+        { id: "fruits", label: t("profile.fruits"), emoji: "🍎" },
+        { id: "pulses", label: t("profile.pulses"), emoji: "🫘" },
+        { id: "oilseeds", label: t("profile.oilseeds"), emoji: "🌻" },
+    ];
+
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">
             {/* Background decorations */}
@@ -242,6 +353,10 @@ const AuthPage = () => {
             </div>
 
             <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
+                {/* Language selector — always visible top-right */}
+                <div className="fixed top-4 right-4 z-50">
+                    <LanguageSelector />
+                </div>
                 {/* Logo */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -619,6 +734,181 @@ const AuthPage = () => {
 
                                     <button onClick={goBack} className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                                         {t("auth.backToMethod")}
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* ─── Step: Farmer Profile Collection ─── */}
+                            {step === "farmerProfile" && (
+                                <motion.div
+                                    key="farmerProfile"
+                                    initial={{ opacity: 0, x: 30 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -30 }}
+                                    className="space-y-5"
+                                >
+                                    <div className="text-center">
+                                        <CheckCircle className="w-10 h-10 mx-auto text-green-400 mb-3" />
+                                        <h2 className="text-xl font-bold font-display text-foreground">
+                                            {t("auth.setupProfile")}
+                                        </h2>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                            {t("auth.setupProfileDesc")}
+                                        </p>
+                                        <div className="flex justify-center gap-1.5 mt-3">
+                                            {[0, 1, 2].map((i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`h-1 w-8 rounded-full transition-colors ${i <= profileSection ? "bg-primary" : "bg-muted"
+                                                        }`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <AnimatePresence mode="wait">
+                                        {/* Sub-step 0: District */}
+                                        {profileSection === 0 && (
+                                            <motion.div key="p-district" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                                <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                                                    <MapPin className="w-4 h-4 text-primary" />
+                                                    {t("profile.districtTitle")}
+                                                </p>
+                                                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                                                    {districts.map((d) => (
+                                                        <button
+                                                            key={d}
+                                                            onClick={() => setProfileData({ ...profileData, district: d })}
+                                                            className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${profileData.district === d
+                                                                ? "bg-primary text-primary-foreground"
+                                                                : "bg-muted/50 text-foreground hover:bg-muted"
+                                                                }`}
+                                                        >
+                                                            {getDistrictName(d, language)}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+
+                                        {/* Sub-step 1: Farmer type + Land */}
+                                        {profileSection === 1 && (
+                                            <motion.div key="p-type" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                                                <div>
+                                                    <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                                                        <Tractor className="w-4 h-4 text-primary" />
+                                                        {t("profile.farmerTypeTitle")}
+                                                    </p>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {farmerTypes.map((ft) => (
+                                                            <button
+                                                                key={ft.id}
+                                                                onClick={() => setProfileData({ ...profileData, farmerType: ft.id })}
+                                                                className={`p-3 rounded-lg text-left transition-all ${profileData.farmerType === ft.id
+                                                                    ? "bg-primary text-primary-foreground"
+                                                                    : "bg-muted/50 hover:bg-muted"
+                                                                    }`}
+                                                            >
+                                                                <p className="text-sm font-medium">{ft.label}</p>
+                                                                <p className={`text-xs mt-0.5 ${profileData.farmerType === ft.id ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{ft.description}</p>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                                                        <Home className="w-4 h-4 text-primary" />
+                                                        {t("profile.landTitle")}
+                                                    </p>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {landOptions.map((lo) => (
+                                                            <button
+                                                                key={lo.id}
+                                                                onClick={() => setProfileData({ ...profileData, landOwnership: lo.id })}
+                                                                className={`p-3 rounded-lg text-center transition-all ${profileData.landOwnership === lo.id
+                                                                    ? "bg-primary text-primary-foreground"
+                                                                    : "bg-muted/50 hover:bg-muted"
+                                                                    }`}
+                                                            >
+                                                                <lo.icon className={`w-5 h-5 mx-auto mb-1 ${profileData.landOwnership === lo.id ? "" : "text-primary"}`} />
+                                                                <p className="text-xs font-medium">{lo.label}</p>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+
+                                        {/* Sub-step 2: Crops */}
+                                        {profileSection === 2 && (
+                                            <motion.div key="p-crops" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                                <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                                                    <Sprout className="w-4 h-4 text-primary" />
+                                                    {t("profile.cropsTitle")}
+                                                </p>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {crops.map((crop) => {
+                                                        const sel = profileData.crops.includes(crop.id);
+                                                        return (
+                                                            <button
+                                                                key={crop.id}
+                                                                onClick={() => {
+                                                                    const newCrops = sel
+                                                                        ? profileData.crops.filter((c) => c !== crop.id)
+                                                                        : [...profileData.crops, crop.id];
+                                                                    setProfileData({ ...profileData, crops: newCrops });
+                                                                }}
+                                                                className={`p-3 rounded-lg text-center transition-all ${sel
+                                                                    ? "bg-primary text-primary-foreground"
+                                                                    : "bg-muted/50 hover:bg-muted"
+                                                                    }`}
+                                                            >
+                                                                <span className="text-2xl block">{crop.emoji}</span>
+                                                                <p className="text-xs font-medium mt-1">{crop.label}</p>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Profile step navigation */}
+                                    <div className="flex gap-3 pt-2">
+                                        {profileSection > 0 && (
+                                            <button
+                                                onClick={() => setProfileSection(profileSection - 1)}
+                                                className="flex-1 px-4 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors"
+                                            >
+                                                {t("profile.back")}
+                                            </button>
+                                        )}
+                                        {profileSection < 2 ? (
+                                            <button
+                                                onClick={() => setProfileSection(profileSection + 1)}
+                                                disabled={!profileCanProceed()}
+                                                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                                            >
+                                                {t("auth.next")}
+                                                <ChevronRight className="w-4 h-4" />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleSaveProfile}
+                                                disabled={!profileCanProceed() || loading}
+                                                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                                            >
+                                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                                {t("auth.saveProfile")}
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={() => navigate("/app", { replace: true })}
+                                        className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {t("auth.skipProfile")}
                                     </button>
                                 </motion.div>
                             )}

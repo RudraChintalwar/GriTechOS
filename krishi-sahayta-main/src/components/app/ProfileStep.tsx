@@ -1,17 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Sprout, Tractor, Droplets, Shield,
   CreditCard, Home, Users, ChevronRight, Wheat,
-  Leaf, CircleDot,
+  Leaf, CircleDot, AlertTriangle,
 } from "lucide-react";
 import { FarmerProfile } from "@/pages/Dashboard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import FloatingCard from "../FloatingCard";
+import { toast } from "sonner";
+import { getDistrictName } from "@/i18n/districtTranslations";
 
 interface ProfileStepProps {
   profile: FarmerProfile;
+  savedProfile?: FarmerProfile | null;
   onComplete: (data: FarmerProfile) => void;
+  isUpdateProfileMode?: boolean;
 }
 
 const districts = [
@@ -25,11 +29,58 @@ const districts = [
   "Yavatmal",
 ];
 
-const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
+const ProfileStep = ({ profile, savedProfile, onComplete, isUpdateProfileMode }: ProfileStepProps) => {
   const [currentSection, setCurrentSection] = useState(0);
   const [formData, setFormData] = useState<FarmerProfile>(profile);
   const [avatar, setAvatar] = useState(1);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Mismatch detection — show toast when value differs from saved profile
+  const lastCheckedRef = useRef<Record<string, string>>({});
+
+  const checkMismatch = (field: keyof FarmerProfile) => {
+    if (!savedProfile || !savedProfile.farmerType || isUpdateProfileMode) return;
+    const saved = savedProfile[field];
+    const current = formData[field];
+    let differs = false;
+    if (Array.isArray(saved) && Array.isArray(current)) {
+      differs = current.length > 0 && JSON.stringify([...saved].sort()) !== JSON.stringify([...current].sort());
+    } else {
+      differs = saved !== current && current !== "" && current !== 0;
+    }
+    // Build a signature of current value to avoid repeat toasts for same selection
+    const sig = JSON.stringify(current);
+    if (differs && lastCheckedRef.current[field] !== sig) {
+      lastCheckedRef.current[field] = sig;
+
+      // Build a display string for the SAVED profile value
+      let savedValue = "";
+      if (field === "district") {
+        savedValue = getDistrictName(savedProfile.district, language);
+      } else if (field === "farmerType") {
+        savedValue = t(`profile.${savedProfile.farmerType}`);
+      } else if (field === "landOwnership") {
+        savedValue = t(`profile.${savedProfile.landOwnership}`);
+      } else if (field === "crops" && Array.isArray(saved)) {
+        savedValue = (saved as string[]).map(c => t(`profile.${c}`)).join(", ");
+      }
+
+      toast.warning(`${t("profile.mismatchWarning")}\n${t("profile.savedProfile")}: ${savedValue}`, {
+        duration: 5000,
+        icon: "⚠️",
+      });
+    } else if (!differs) {
+      delete lastCheckedRef.current[field];
+    }
+  };
+
+  // Fire mismatch check whenever formData changes
+  useEffect(() => {
+    checkMismatch("district");
+    checkMismatch("farmerType");
+    checkMismatch("landOwnership");
+    checkMismatch("crops");
+  }, [formData]);
 
   const farmerTypes = [
     { id: "marginal", label: t("profile.marginal"), icon: Sprout, description: t("profile.marginalDesc") },
@@ -68,6 +119,14 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
     { title: t("profile.cropsTitle"), subtitle: t("profile.cropsSubtitle") },
     { title: t("profile.reqTitle"), subtitle: t("profile.reqSubtitle") },
   ];
+
+  const currentSections = isUpdateProfileMode ? sections.slice(0, 3) : sections;
+
+  useEffect(() => {
+    if (currentSection >= currentSections.length) {
+      setCurrentSection(Math.max(0, currentSections.length - 1));
+    }
+  }, [currentSections.length, currentSection]);
 
   const updateAvatar = () => {
     const filled = [
@@ -108,8 +167,12 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-4xl font-bold font-display mb-4"
           >
-            <span className="text-foreground">{t("profile.title")} </span>
-            <span className="text-gradient">{t("profile.titleHighlight")}</span>
+            <span className="text-foreground">
+              {isUpdateProfileMode ? t("profile.updateProfile") : t("profile.title")} {isUpdateProfileMode ? "" : " "}
+            </span>
+            {!isUpdateProfileMode && (
+              <span className="text-gradient">{t("profile.titleHighlight")}</span>
+            )}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -117,7 +180,7 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
             transition={{ delay: 0.1 }}
             className="text-muted-foreground"
           >
-            {sections[currentSection].subtitle}
+            {currentSections[currentSection]?.subtitle}
           </motion.p>
         </div>
 
@@ -151,11 +214,11 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
                       cx="64" cy="64" r="60" fill="none"
                       stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
                       initial={{ pathLength: 0 }}
-                      animate={{ pathLength: (currentSection + 1) / sections.length }}
+                      animate={{ pathLength: (currentSection + 1) / currentSections.length }}
                       transition={{ duration: 0.5 }}
-                      style={{ pathLength: (currentSection + 1) / sections.length }}
+                      style={{ pathLength: (currentSection + 1) / currentSections.length }}
                       strokeDasharray="377"
-                      strokeDashoffset={377 - (377 * (currentSection + 1)) / sections.length}
+                      strokeDashoffset={377 - (377 * (currentSection + 1)) / currentSections.length}
                     />
                   </svg>
                 </motion.div>
@@ -164,14 +227,14 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
                   {t("profile.yourProfile")}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {currentSection + 1} {t("common.of")} {sections.length} {t("profile.complete")}
+                  {currentSection + 1} {t("common.of")} {currentSections.length} {t("profile.complete")}
                 </p>
 
                 <div className="mt-6 space-y-2 text-left">
                   {formData.district && (
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="w-4 h-4 text-primary" />
-                      <span className="text-foreground">{formData.district}, {t("profile.maharashtra")}</span>
+                      <span className="text-foreground">{getDistrictName(formData.district, language)}, {t("profile.maharashtra")}</span>
                     </div>
                   )}
                   {formData.farmerType && (
@@ -210,7 +273,7 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          <span className="font-medium">{district}</span>
+                          <span className="font-medium">{getDistrictName(district, language)}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -351,7 +414,7 @@ const ProfileStep = ({ profile, onComplete }: ProfileStepProps) => {
                 whileHover={canProceed() ? { scale: 1.05 } : {}}
                 whileTap={canProceed() ? { scale: 0.98 } : {}}
               >
-                {currentSection === sections.length - 1 ? t("profile.findSchemes") : t("profile.continue")}
+                {isUpdateProfileMode ? t("auth.saveProfile") : currentSection === currentSections.length - 1 ? t("profile.findSchemes") : t("profile.continue")}
                 <ChevronRight className="w-5 h-5" />
               </motion.button>
             </div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Globe, Mic, Volume2, MessageCircle } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
 import FloatingCard from "../FloatingCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const languages = [
   { code: "en", name: "English", native: "English" },
@@ -27,6 +28,7 @@ const greetings: Record<string, string> = {
 };
 
 const VoiceSection = () => {
+  const { t } = useLanguage();
   const [selectedLang, setSelectedLang] = useState("hi");
   const [isListening, setIsListening] = useState(false);
 
@@ -64,21 +66,20 @@ const VoiceSection = () => {
               >
                 <Globe className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-muted-foreground">
-                  Multilingual + Voice
+                  {t("voice.badge")}
                 </span>
               </motion.div>
 
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display">
-                <span className="text-foreground">Built for </span>
-                <span className="text-gradient">farmers.</span>
+                <span className="text-foreground">{t("voice.title1")}</span>
+                <span className="text-gradient">{t("voice.title2")}</span>
                 <br />
-                <span className="text-foreground">Not for </span>
-                <span className="text-muted-foreground">forms.</span>
+                <span className="text-foreground">{t("voice.title3")}</span>
+                <span className="text-muted-foreground">{t("voice.title4")}</span>
               </h2>
 
               <p className="text-xl text-muted-foreground max-w-lg">
-                Speak in your language. The system understands. No typing,
-                no complex navigation. Just natural conversation.
+                {t("voice.subtitle")}
               </p>
 
               {/* Language selector */}
@@ -180,9 +181,9 @@ const VoiceSection = () => {
                 transition={{ delay: 0.5 }}
               >
                 {isListening ? (
-                  <span className="text-primary">Listening...</span>
+                  <span className="text-primary">{t("voice.listening")}</span>
                 ) : (
-                  "Tap to start voice interaction"
+                  t("voice.tap")
                 )}
               </motion.p>
 

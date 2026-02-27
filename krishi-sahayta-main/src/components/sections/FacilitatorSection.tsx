@@ -3,15 +3,17 @@ import { useState } from "react";
 import { Users, UserCheck, Printer, Share2, ArrowRight } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
 import FloatingCard from "../FloatingCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FacilitatorSection = () => {
+  const { t } = useLanguage();
   const [activeMode, setActiveMode] = useState<"farmer" | "csc">("farmer");
 
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-earth" />
-      
+
       <div className="relative z-10 container mx-auto px-4">
         {/* Header */}
         <ScrollReveal className="text-center mb-16">
@@ -21,18 +23,17 @@ const FacilitatorSection = () => {
           >
             <Users className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
-              Ecosystem Ready
+              {t("facilitator.badge")}
             </span>
           </motion.div>
 
           <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
-            <span className="text-foreground">Designed for the </span>
-            <span className="text-gradient">real ecosystem</span>
+            <span className="text-foreground">{t("facilitator.title1")}</span>
+            <span className="text-gradient">{t("facilitator.title2")}</span>
           </h2>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Whether it's a farmer on their own or a CSC operator assisting them, 
-            the experience adapts.
+            {t("facilitator.subtitle")}
           </p>
         </ScrollReveal>
 
@@ -43,27 +44,27 @@ const FacilitatorSection = () => {
               onClick={() => setActiveMode("farmer")}
               className={`
                 px-6 py-3 rounded-full text-sm font-medium transition-all
-                ${activeMode === "farmer" 
-                  ? 'bg-primary text-primary-foreground' 
+                ${activeMode === "farmer"
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
                 }
               `}
               whileTap={{ scale: 0.95 }}
             >
-              Farmer Mode
+              {t("facilitator.farmerMode")}
             </motion.button>
             <motion.button
               onClick={() => setActiveMode("csc")}
               className={`
                 px-6 py-3 rounded-full text-sm font-medium transition-all
-                ${activeMode === "csc" 
-                  ? 'bg-primary text-primary-foreground' 
+                ${activeMode === "csc"
+                  ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground'
                 }
               `}
               whileTap={{ scale: 0.95 }}
             >
-              CSC Mode
+              {t("facilitator.cscMode")}
             </motion.button>
           </div>
         </div>
@@ -71,7 +72,7 @@ const FacilitatorSection = () => {
         {/* Split screen demo */}
         <div className="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Farmer Mode Card */}
-          <FloatingCard 
+          <FloatingCard
             className={`p-8 transition-all duration-500 ${activeMode === "farmer" ? 'ring-2 ring-primary' : 'opacity-60'}`}
             delay={0.1}
           >
@@ -82,8 +83,8 @@ const FacilitatorSection = () => {
                     <UserCheck className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold font-display text-foreground">Farmer Mode</h3>
-                    <p className="text-sm text-muted-foreground">Self-service experience</p>
+                    <h3 className="text-xl font-bold font-display text-foreground">{t("facilitator.farmerMode")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("facilitator.selfService")}</p>
                   </div>
                 </div>
                 {activeMode === "farmer" && (
@@ -97,7 +98,7 @@ const FacilitatorSection = () => {
 
               <div className="space-y-4">
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Large touch targets</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.touchTargets")}</p>
                   <div className="flex gap-2">
                     {["🌾", "🌽", "🍚"].map((emoji) => (
                       <motion.div
@@ -113,22 +114,22 @@ const FacilitatorSection = () => {
                 </div>
 
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Voice-first navigation</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.voiceNav")}</p>
                   <div className="flex items-center gap-2">
                     <div className="h-2 flex-1 rounded-full bg-primary/20">
-                      <motion.div 
+                      <motion.div
                         className="h-full rounded-full bg-primary"
                         initial={{ width: 0 }}
                         animate={{ width: activeMode === "farmer" ? "70%" : "0%" }}
                         transition={{ duration: 1 }}
                       />
                     </div>
-                    <span className="text-xs text-primary">Listening...</span>
+                    <span className="text-xs text-primary">{t("voice.listening")}</span>
                   </div>
                 </div>
 
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Simple language</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.simpleLang")}</p>
                   <p className="text-foreground">"आपको प्रति वर्ष ₹6,000 मिलेंगे"</p>
                 </div>
               </div>
@@ -136,7 +137,7 @@ const FacilitatorSection = () => {
           </FloatingCard>
 
           {/* CSC Mode Card */}
-          <FloatingCard 
+          <FloatingCard
             className={`p-8 transition-all duration-500 ${activeMode === "csc" ? 'ring-2 ring-primary' : 'opacity-60'}`}
             delay={0.2}
           >
@@ -147,8 +148,8 @@ const FacilitatorSection = () => {
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold font-display text-foreground">CSC Mode</h3>
-                    <p className="text-sm text-muted-foreground">Assisted workflow</p>
+                    <h3 className="text-xl font-bold font-display text-foreground">{t("facilitator.cscMode")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("facilitator.assisted")}</p>
                   </div>
                 </div>
                 {activeMode === "csc" && (
@@ -162,16 +163,16 @@ const FacilitatorSection = () => {
 
               <div className="space-y-4">
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Batch processing</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.batch")}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-foreground font-medium">12 farmers</span>
+                    <span className="text-foreground font-medium">12 {t("facilitator.farmers")}</span>
                     <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground font-medium">47 schemes</span>
+                    <span className="text-foreground font-medium">47 {t("facilitator.schemes")}</span>
                   </div>
                 </div>
 
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Quick actions</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.quickActions")}</p>
                   <div className="flex gap-2">
                     <motion.button
                       className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted text-foreground text-sm"
@@ -179,7 +180,7 @@ const FacilitatorSection = () => {
                       whileTap={{ scale: 0.95 }}
                     >
                       <Printer className="w-4 h-4" />
-                      Print
+                      {t("facilitator.print")}
                     </motion.button>
                     <motion.button
                       className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted text-foreground text-sm"
@@ -187,20 +188,20 @@ const FacilitatorSection = () => {
                       whileTap={{ scale: 0.95 }}
                     >
                       <Share2 className="w-4 h-4" />
-                      Share
+                      {t("facilitator.share")}
                     </motion.button>
                   </div>
                 </div>
 
                 <div className="glass-card p-4 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-2">Summary card preview</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t("facilitator.summary")}</p>
                   <div className="border border-border rounded-lg p-3 bg-background/50">
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Farmer ID</span>
+                      <span className="text-muted-foreground">{t("facilitator.farmerId")}</span>
                       <span className="text-foreground">MH-2024-001</span>
                     </div>
                     <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Eligible Schemes</span>
+                      <span className="text-muted-foreground">{t("facilitator.eligible")}</span>
                       <span className="text-primary font-bold">5</span>
                     </div>
                   </div>

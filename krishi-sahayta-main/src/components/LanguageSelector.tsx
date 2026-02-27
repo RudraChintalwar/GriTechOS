@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe } from "lucide-react";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 
 const languages: { id: Language; label: string; flag: string }[] = [
@@ -73,20 +72,18 @@ const LanguageSelector = ({ variant = "default" }: LanguageSelectorProps) => {
                 ref={buttonRef}
                 onClick={handleToggle}
                 className={`
-          flex items-center gap-2 rounded-full transition-all
-          ${variant === "compact"
-                        ? "w-10 h-10 justify-center glass-card text-muted-foreground hover:text-foreground"
+                    flex items-center gap-2 rounded-full transition-all
+                    ${variant === "compact"
+                        ? "px-3 py-2 glass-card text-muted-foreground hover:text-foreground"
                         : "px-3 py-2 glass-card text-sm text-muted-foreground hover:text-foreground"
                     }
-        `}
+                `}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 title={t("lang.label")}
             >
-                <Globe className="w-4 h-4" />
-                {variant !== "compact" && (
-                    <span className="hidden sm:inline">{current.label}</span>
-                )}
+                <span className="text-base font-bold leading-none" style={{ fontFamily: "'Noto Sans Devanagari', sans-serif" }}>अ</span>
+                <span className="text-xs font-medium">{current.label}</span>
             </motion.button>
 
             {/* Portal dropdown — renders outside navbar DOM to avoid overflow:hidden clipping */}

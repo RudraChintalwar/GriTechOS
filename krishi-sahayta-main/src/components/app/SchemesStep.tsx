@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle, ChevronDown, ExternalLink,
-  HelpCircle, Download, Share2, Star, RefreshCw, X, Globe, Loader2
+  HelpCircle, Download, Share2, Star, RefreshCw, X, Globe, Loader2, UserCog
 } from "lucide-react";
 import { FarmerProfile } from "@/pages/Dashboard";
 import { MatchedScheme } from "@/lib/schemeEngine";
@@ -10,6 +10,7 @@ import { useLanguage, Language } from "@/contexts/LanguageContext";
 import FloatingCard from "../FloatingCard";
 import { generatePdf } from "@/lib/pdfGenerator";
 import { toast } from "sonner";
+import { getDistrictName } from "@/i18n/districtTranslations";
 
 const PYTHON_API = "/python-api";
 
@@ -33,6 +34,7 @@ interface SchemesStepProps {
   schemes: MatchedScheme[];
   profile: FarmerProfile;
   onBack: () => void;
+  onEditProfile?: () => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -49,7 +51,7 @@ const categoryColors: Record<string, string> = {
   "Livestock": "from-orange-500 to-amber-500",
 };
 
-const SchemesStep = ({ schemes, profile, onBack }: SchemesStepProps) => {
+const SchemesStep = ({ schemes, profile, onBack, onEditProfile }: SchemesStepProps) => {
   const [expandedScheme, setExpandedScheme] = useState<number | null>(null);
   const [showExplainer, setShowExplainer] = useState<number | null>(null);
   const [showPdfLangPicker, setShowPdfLangPicker] = useState(false);
@@ -167,6 +169,17 @@ const SchemesStep = ({ schemes, profile, onBack }: SchemesStepProps) => {
               <RefreshCw className="w-4 h-4" />
               <span className="hidden sm:inline">{t("schemes.updateProfile")}</span>
             </motion.button>
+            {onEditProfile && (
+              <motion.button
+                onClick={onEditProfile}
+                className="glass-card px-4 py-2 rounded-lg flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <UserCog className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("profile.updateProfile")}</span>
+              </motion.button>
+            )}
             <div className="relative">
               <motion.button
                 onClick={() => setShowPdfLangPicker(!showPdfLangPicker)}
@@ -215,6 +228,45 @@ const SchemesStep = ({ schemes, profile, onBack }: SchemesStepProps) => {
             </motion.button>
           </motion.div>
         </div>
+
+        {/* Search criteria summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-6 glass-card rounded-xl p-4 border border-border/50"
+        >
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            {t("search.criteria")}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {profile.district && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 text-foreground text-xs font-semibold border border-primary/30">
+                📍 {t("search.district")}: {getDistrictName(profile.district, language)}
+              </span>
+            )}
+            {profile.farmerType && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/20 text-foreground text-xs font-semibold border border-emerald-500/30">
+                🧑‍🌾 {t("search.farmerType")}: {t(`profile.${profile.farmerType}`)}
+              </span>
+            )}
+            {profile.landOwnership && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 text-foreground text-xs font-semibold border border-amber-500/30">
+                🏠 {t("search.landOwnership")}: {t(`profile.${profile.landOwnership}`)}
+              </span>
+            )}
+            {profile.crops.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/20 text-foreground text-xs font-semibold border border-cyan-500/30">
+                🌾 {t("search.crops")}: {profile.crops.map((c) => t(`profile.${c}`)).join(", ")}
+              </span>
+            )}
+            {profile.requirements.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/20 text-foreground text-xs font-semibold border border-purple-500/30">
+                🎯 {t("search.requirements")}: {profile.requirements.map((r) => t(`profile.${r}`)).join(", ")}
+              </span>
+            )}
+          </div>
+        </motion.div>
 
         {/* Schemes grid */}
         <div className="space-y-4">

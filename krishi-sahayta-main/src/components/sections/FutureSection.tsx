@@ -1,40 +1,43 @@
 import { motion } from "framer-motion";
 import { Mic, MapPin, Globe, Bot, Lock, Sparkles } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
-
-const futureFeatures = [
-  {
-    icon: Mic,
-    title: "Voice-Only Navigation",
-    description: "Complete hands-free experience",
-    status: "coming",
-  },
-  {
-    icon: MapPin,
-    title: "Regional Expansion",
-    description: "All 28 states + UTs covered",
-    status: "coming",
-  },
-  {
-    icon: Globe,
-    title: "Real-Time APIs",
-    description: "Live government data sync",
-    status: "planned",
-  },
-  {
-    icon: Bot,
-    title: "AI Verification",
-    description: "Automated eligibility checks",
-    status: "planned",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FutureSection = () => {
+  const { t } = useLanguage();
+
+  const futureFeatures = [
+    {
+      icon: Mic,
+      title: t("future.voice"),
+      description: t("future.voiceDesc"),
+      status: "coming" as const,
+    },
+    {
+      icon: MapPin,
+      title: t("future.regional"),
+      description: t("future.regionalDesc"),
+      status: "coming" as const,
+    },
+    {
+      icon: Globe,
+      title: t("future.api"),
+      description: t("future.apiDesc"),
+      status: "planned" as const,
+    },
+    {
+      icon: Bot,
+      title: t("future.ai"),
+      description: t("future.aiDesc"),
+      status: "planned" as const,
+    },
+  ];
+
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background to-card/30" />
-      
+
       {/* Animated grid */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -55,17 +58,17 @@ const FutureSection = () => {
           >
             <Sparkles className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-muted-foreground">
-              Roadmap
+              {t("future.badge")}
             </span>
           </motion.div>
 
           <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
-            <span className="text-foreground">The future is </span>
-            <span className="text-gradient">being built</span>
+            <span className="text-foreground">{t("future.title1")}</span>
+            <span className="text-gradient">{t("future.title2")}</span>
           </h2>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            GriTech OS is just getting started. Here's what's on the horizon.
+            {t("future.subtitle")}
           </p>
         </ScrollReveal>
 
@@ -85,12 +88,12 @@ const FutureSection = () => {
                 {/* Status badge */}
                 <div className={`
                   absolute -top-2 -left-2 px-3 py-1 rounded-full text-xs font-medium
-                  ${feature.status === 'coming' 
-                    ? 'bg-primary/20 text-primary' 
+                  ${feature.status === 'coming'
+                    ? 'bg-primary/20 text-primary'
                     : 'bg-muted text-muted-foreground'
                   }
                 `}>
-                  {feature.status === 'coming' ? 'Coming Soon' : 'Planned'}
+                  {feature.status === 'coming' ? t("future.coming") : t("future.planned")}
                 </div>
 
                 <motion.div
@@ -142,7 +145,7 @@ const FutureSection = () => {
             whileTap={{ scale: 0.95 }}
           >
             <Sparkles className="w-4 h-4" />
-            Get Early Access
+            {t("future.earlyAccess")}
           </motion.button>
         </ScrollReveal>
       </div>

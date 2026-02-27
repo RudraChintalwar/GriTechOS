@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useLocation } from "react-router-dom";
 import AppNavbar from "@/components/app/AppNavbar";
 import ProfileStep from "@/components/app/ProfileStep";
 import MatchingStep from "@/components/app/MatchingStep";
@@ -11,8 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db } from "@/lib/firebase";
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
-
-
+import { toast } from "sonner";
 
 export interface FarmerProfile {
   district: string;
@@ -25,6 +25,7 @@ export interface FarmerProfile {
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
 
   const steps = [
     { id: 1, name: t("dashboard.profile"), description: t("dashboard.profileDesc") },
@@ -44,6 +45,7 @@ const Dashboard = () => {
   const [matchedSchemes, setMatchedSchemes] = useState<MatchedScheme[]>([]);
   const [isMatching, setIsMatching] = useState(false);
   const [allSchemes, setAllSchemes] = useState<SchemeData[]>([]);
+  const [savedProfile, setSavedProfile] = useState<FarmerProfile | null>(null);
   const { user } = useAuth();
 
   // Load schemes from Firestore
@@ -72,6 +74,7 @@ const Dashboard = () => {
           const savedProfile = profileSnap.data().profile as FarmerProfile;
           if (savedProfile && savedProfile.farmerType) {
             setProfile(savedProfile);
+            setSavedProfile(savedProfile);
           }
         }
       } catch (err) {
@@ -94,18 +97,19 @@ const Dashboard = () => {
     setCurrentStep(2);
     setIsMatching(true);
 
-    // Save profile to Firestore
-    if (user) {
+    // Save profile to Firestore only if first time saving
+    if (user && !savedProfile) {
       try {
         await setDoc(
           doc(db, "users", user.uid),
           {
             profile: data,
-            phoneNumber: user.phoneNumber,
+            phoneNumber: user.phoneNumber || "",
             updatedAt: new Date().toISOString(),
           },
           { merge: true }
         );
+        setSavedProfile(data);
       } catch (err) {
         console.error("Error saving profile:", err);
       }
@@ -151,6 +155,7 @@ const Dashboard = () => {
             >
               <ProfileStep
                 profile={profile}
+                savedProfile={savedProfile}
                 onComplete={handleProfileComplete}
               />
             </motion.div>
@@ -180,6 +185,7 @@ const Dashboard = () => {
                 schemes={matchedSchemes}
                 profile={profile}
                 onBack={() => setCurrentStep(1)}
+                onEditProfile={() => navigate("/profile")}
               />
             </motion.div>
           )}

@@ -3,7 +3,6 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import SolutionSection from "@/components/sections/SolutionSection";
 import VoiceSection from "@/components/sections/VoiceSection";
-import FacilitatorSection from "@/components/sections/FacilitatorSection";
 import ImpactSection from "@/components/sections/ImpactSection";
 import FutureSection from "@/components/sections/FutureSection";
 import CTASection from "@/components/sections/CTASection";
@@ -35,8 +34,6 @@ const Index = () => {
           <VoiceSection />
         </section>
 
-        {/* Section 4: CSC / Facilitator Mode */}
-        <FacilitatorSection />
 
         {/* Section 5: Impact Visualization */}
         <section id="impact">
