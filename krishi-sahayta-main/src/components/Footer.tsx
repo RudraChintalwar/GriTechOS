@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { Leaf, Github, Twitter, Linkedin } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t } = useLanguage();
+
   return (
     <footer className="relative py-16 overflow-hidden">
       <div className="absolute inset-0 bg-card/50" />
@@ -10,7 +13,7 @@ const Footer = () => {
       <div className="relative z-10 container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Logo */}
-          <motion.div 
+          <motion.div
             className="flex items-center gap-3"
             whileHover={{ scale: 1.05 }}
           >
@@ -24,14 +27,23 @@ const Footer = () => {
 
           {/* Links */}
           <div className="flex items-center gap-6">
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              About
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t("footer.about")}
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              How It Works
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t("footer.howItWorks")}
             </a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Contact
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t("footer.contact")}
             </a>
           </div>
 
@@ -53,7 +65,7 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 GriTech OS. Built for India's farmers with ❤️
+            {t("footer.copyright")}
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Globe, Mic, Volume2, MessageCircle } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
 import FloatingCard from "../FloatingCard";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const languages = [
   { code: "en", name: "English", native: "English" },
@@ -29,6 +30,7 @@ const greetings: Record<string, string> = {
 const VoiceSection = () => {
   const [selectedLang, setSelectedLang] = useState("hi");
   const [isListening, setIsListening] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <section className="relative py-32 overflow-hidden">
@@ -64,21 +66,22 @@ const VoiceSection = () => {
               >
                 <Globe className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-muted-foreground">
-                  Multilingual + Voice
+                  {t("voice.badge")}
                 </span>
               </motion.div>
 
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display">
-                <span className="text-foreground">Built for </span>
-                <span className="text-gradient">farmers.</span>
+                <span className="text-foreground">{t("voice.heading1")}</span>
+                <span className="text-gradient">{t("voice.heading2")}</span>
                 <br />
-                <span className="text-foreground">Not for </span>
-                <span className="text-muted-foreground">forms.</span>
+                <span className="text-foreground">{t("voice.heading3")}</span>
+                <span className="text-muted-foreground">
+                  {t("voice.heading4")}
+                </span>
               </h2>
 
               <p className="text-xl text-muted-foreground max-w-lg">
-                Speak in your language. The system understands. No typing,
-                no complex navigation. Just natural conversation.
+                {t("voice.paragraph")}
               </p>
 
               {/* Language selector */}
@@ -89,9 +92,10 @@ const VoiceSection = () => {
                     onClick={() => setSelectedLang(lang.code)}
                     className={`
                       px-4 py-2 rounded-full text-sm font-medium transition-all
-                      ${selectedLang === lang.code
-                        ? 'bg-primary text-primary-foreground shadow-glow'
-                        : 'glass-card text-muted-foreground hover:text-foreground'
+                      ${
+                        selectedLang === lang.code
+                          ? "bg-primary text-primary-foreground shadow-glow"
+                          : "glass-card text-muted-foreground hover:text-foreground"
                       }
                     `}
                     whileHover={{ scale: 1.05 }}
@@ -136,9 +140,10 @@ const VoiceSection = () => {
                   className={`
                     absolute inset-8 rounded-full flex items-center justify-center
                     transition-all duration-300
-                    ${isListening
-                      ? 'bg-gradient-accent shadow-glow-lg'
-                      : 'glass-card hover:shadow-glow'
+                    ${
+                      isListening
+                        ? "bg-gradient-accent shadow-glow-lg"
+                        : "glass-card hover:shadow-glow"
                     }
                   `}
                   whileHover={{ scale: 1.05 }}
@@ -180,9 +185,9 @@ const VoiceSection = () => {
                 transition={{ delay: 0.5 }}
               >
                 {isListening ? (
-                  <span className="text-primary">Listening...</span>
+                  <span className="text-primary">{t("voice.listening")}</span>
                 ) : (
-                  "Tap to start voice interaction"
+                  t("voice.tapToStart")
                 )}
               </motion.p>
 
@@ -193,7 +198,9 @@ const VoiceSection = () => {
                     <MessageCircle className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Krishi Saathi</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {t("voice.botName")}
+                    </p>
                     <p className="text-foreground">
                       {greetings[selectedLang] || greetings["en"]}
                     </p>

@@ -3,39 +3,10 @@ import { useRef } from "react";
 import { User, Brain, Search, FileText, CheckCircle, Zap } from "lucide-react";
 import FloatingCard from "../FloatingCard";
 import ScrollReveal from "../ScrollReveal";
-
-const workflowSteps = [
-  {
-    icon: User,
-    title: "Farmer Profile",
-    description: "Simple inputs through visual selection",
-    details: ["Location mapping", "Crop selection", "Land details", "Requirements"],
-    color: "from-emerald-500 to-green-500",
-  },
-  {
-    icon: Brain,
-    title: "Eligibility Intelligence",
-    description: "Smart rules match your profile",
-    details: ["Rule-based matching", "Real-time processing", "No complex forms", "Instant results"],
-    color: "from-lime-500 to-emerald-500",
-  },
-  {
-    icon: Search,
-    title: "Scheme Discovery",
-    description: "Only relevant schemes appear",
-    details: ["Personalized results", "Ranked by relevance", "Filter by category", "Smart suggestions"],
-    color: "from-green-500 to-teal-500",
-  },
-  {
-    icon: FileText,
-    title: "Simple Explanations",
-    description: "Benefits in clear language",
-    details: ["No jargon", "Visual guides", "Step-by-step help", "Multilingual support"],
-    color: "from-teal-500 to-cyan-500",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const SolutionSection = () => {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -44,11 +15,62 @@ const SolutionSection = () => {
 
   const x = useTransform(scrollYProgress, [0, 1], ["0%", "-50%"]);
 
+  const workflowSteps = [
+    {
+      icon: User,
+      title: t("solution.step1Title"),
+      description: t("solution.step1Desc"),
+      details: [
+        t("solution.step1Detail1"),
+        t("solution.step1Detail2"),
+        t("solution.step1Detail3"),
+        t("solution.step1Detail4"),
+      ],
+      color: "from-emerald-500 to-green-500",
+    },
+    {
+      icon: Brain,
+      title: t("solution.step2Title"),
+      description: t("solution.step2Desc"),
+      details: [
+        t("solution.step2Detail1"),
+        t("solution.step2Detail2"),
+        t("solution.step2Detail3"),
+        t("solution.step2Detail4"),
+      ],
+      color: "from-lime-500 to-emerald-500",
+    },
+    {
+      icon: Search,
+      title: t("solution.step3Title"),
+      description: t("solution.step3Desc"),
+      details: [
+        t("solution.step3Detail1"),
+        t("solution.step3Detail2"),
+        t("solution.step3Detail3"),
+        t("solution.step3Detail4"),
+      ],
+      color: "from-green-500 to-teal-500",
+    },
+    {
+      icon: FileText,
+      title: t("solution.step4Title"),
+      description: t("solution.step4Desc"),
+      details: [
+        t("solution.step4Detail1"),
+        t("solution.step4Detail2"),
+        t("solution.step4Detail3"),
+        t("solution.step4Detail4"),
+      ],
+      color: "from-teal-500 to-cyan-500",
+    },
+  ];
+
   return (
     <section ref={containerRef} className="relative py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/50 to-background" />
-      
+
       {/* Animated connection lines */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <svg className="absolute w-full h-full opacity-20">
@@ -82,17 +104,17 @@ const SolutionSection = () => {
           >
             <Zap className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-muted-foreground">
-              The Solution
+              {t("solution.badge")}
             </span>
           </motion.div>
-          
+
           <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
-            <span className="text-foreground">Intelligence that </span>
-            <span className="text-gradient">works for you</span>
+            <span className="text-foreground">{t("solution.heading1")}</span>
+            <span className="text-gradient">{t("solution.heading2")}</span>
           </h2>
-          
+
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Four simple steps to discover every scheme you're eligible for
+            {t("solution.subtitle")}
           </p>
         </ScrollReveal>
 
@@ -102,7 +124,7 @@ const SolutionSection = () => {
           <div className="hidden lg:grid grid-cols-4 gap-6">
             {workflowSteps.map((step, index) => (
               <FloatingCard
-                key={step.title}
+                key={index}
                 delay={index * 0.15}
                 glowing={index === 1}
                 className="p-8"
@@ -111,7 +133,7 @@ const SolutionSection = () => {
                 <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center text-primary-foreground font-bold text-sm">
                   {index + 1}
                 </div>
-                
+
                 {/* Icon */}
                 <motion.div
                   className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} p-4 mb-6`}
@@ -120,25 +142,26 @@ const SolutionSection = () => {
                 >
                   <step.icon className="w-full h-full text-white" />
                 </motion.div>
-                
+
                 {/* Content */}
                 <h3 className="text-xl font-bold font-display mb-2 text-foreground">
                   {step.title}
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  {step.description}
-                </p>
-                
+                <p className="text-muted-foreground mb-4">{step.description}</p>
+
                 {/* Details */}
                 <ul className="space-y-2">
-                  {step.details.map((detail) => (
-                    <li key={detail} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {step.details.map((detail, di) => (
+                    <li
+                      key={di}
+                      className="flex items-center gap-2 text-sm text-muted-foreground"
+                    >
                       <CheckCircle className="w-4 h-4 text-primary" />
                       {detail}
                     </li>
                   ))}
                 </ul>
-                
+
                 {/* Connection line to next */}
                 {index < workflowSteps.length - 1 && (
                   <div className="absolute top-1/2 -right-3 w-6 h-px bg-gradient-to-r from-primary to-transparent" />
@@ -149,37 +172,37 @@ const SolutionSection = () => {
 
           {/* Mobile horizontal scroll */}
           <div className="lg:hidden overflow-x-auto pb-8 -mx-4 px-4 custom-scrollbar">
-            <motion.div 
-              className="flex gap-6"
-              style={{ width: "fit-content" }}
-            >
+            <motion.div className="flex gap-6" style={{ width: "fit-content" }}>
               {workflowSteps.map((step, index) => (
                 <FloatingCard
-                  key={step.title}
+                  key={index}
                   delay={index * 0.1}
                   className="p-6 w-72 flex-shrink-0"
                 >
                   <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center text-primary-foreground font-bold text-sm">
                     {index + 1}
                   </div>
-                  
+
                   <motion.div
                     className={`w-14 h-14 rounded-xl bg-gradient-to-br ${step.color} p-3 mb-4`}
                     whileHover={{ rotate: [0, -10, 10, 0] }}
                   >
                     <step.icon className="w-full h-full text-white" />
                   </motion.div>
-                  
+
                   <h3 className="text-lg font-bold font-display mb-2 text-foreground">
                     {step.title}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     {step.description}
                   </p>
-                  
+
                   <ul className="space-y-1">
-                    {step.details.slice(0, 2).map((detail) => (
-                      <li key={detail} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {step.details.slice(0, 2).map((detail, di) => (
+                      <li
+                        key={di}
+                        className="flex items-center gap-2 text-xs text-muted-foreground"
+                      >
                         <CheckCircle className="w-3 h-3 text-primary" />
                         {detail}
                       </li>
@@ -199,7 +222,7 @@ const SolutionSection = () => {
           >
             <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
             <span className="text-muted-foreground">
-              Processing <span className="text-foreground font-semibold">2,000+</span> government schemes in real-time
+              {t("solution.bottomAccent", { count: "2,000+" })}
             </span>
           </motion.div>
         </ScrollReveal>

@@ -1,49 +1,55 @@
 import { motion } from "framer-motion";
 import { Mic, MapPin, Globe, Bot, Lock, Sparkles } from "lucide-react";
 import ScrollReveal from "../ScrollReveal";
-
-const futureFeatures = [
-  {
-    icon: Mic,
-    title: "Voice-Only Navigation",
-    description: "Complete hands-free experience",
-    status: "coming",
-  },
-  {
-    icon: MapPin,
-    title: "Regional Expansion",
-    description: "All 28 states + UTs covered",
-    status: "coming",
-  },
-  {
-    icon: Globe,
-    title: "Real-Time APIs",
-    description: "Live government data sync",
-    status: "planned",
-  },
-  {
-    icon: Bot,
-    title: "AI Verification",
-    description: "Automated eligibility checks",
-    status: "planned",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FutureSection = () => {
+  const { t } = useLanguage();
+
+  const futureFeatures = [
+    {
+      icon: Mic,
+      title: t("future.voiceTitle"),
+      description: t("future.voiceDesc"),
+      status: "coming",
+    },
+    {
+      icon: MapPin,
+      title: t("future.regionalTitle"),
+      description: t("future.regionalDesc"),
+      status: "coming",
+    },
+    {
+      icon: Globe,
+      title: t("future.apiTitle"),
+      description: t("future.apiDesc"),
+      status: "planned",
+    },
+    {
+      icon: Bot,
+      title: t("future.aiTitle"),
+      description: t("future.aiDesc"),
+      status: "planned",
+    },
+  ];
+
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background to-card/30" />
-      
+
       {/* Animated grid */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
             linear-gradient(to right, hsl(var(--primary) / 0.2) 1px, transparent 1px),
             linear-gradient(to bottom, hsl(var(--primary) / 0.2) 1px, transparent 1px)
           `,
-          backgroundSize: '80px 80px',
-        }} />
+            backgroundSize: "80px 80px",
+          }}
+        />
       </div>
 
       <div className="relative z-10 container mx-auto px-4">
@@ -55,24 +61,24 @@ const FutureSection = () => {
           >
             <Sparkles className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-muted-foreground">
-              Roadmap
+              {t("future.badge")}
             </span>
           </motion.div>
 
           <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
-            <span className="text-foreground">The future is </span>
-            <span className="text-gradient">being built</span>
+            <span className="text-foreground">{t("future.heading1")}</span>
+            <span className="text-gradient">{t("future.heading2")}</span>
           </h2>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            GriTech OS is just getting started. Here's what's on the horizon.
+            {t("future.subtitle")}
           </p>
         </ScrollReveal>
 
         {/* Future cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {futureFeatures.map((feature, index) => (
-            <ScrollReveal key={feature.title} delay={index * 0.1}>
+            <ScrollReveal key={index} delay={index * 0.1}>
               <motion.div
                 className="locked-card group relative"
                 whileHover={{ y: -5 }}
@@ -83,26 +89,35 @@ const FutureSection = () => {
                 </div>
 
                 {/* Status badge */}
-                <div className={`
+                <div
+                  className={`
                   absolute -top-2 -left-2 px-3 py-1 rounded-full text-xs font-medium
-                  ${feature.status === 'coming' 
-                    ? 'bg-primary/20 text-primary' 
-                    : 'bg-muted text-muted-foreground'
+                  ${
+                    feature.status === "coming"
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
                   }
-                `}>
-                  {feature.status === 'coming' ? 'Coming Soon' : 'Planned'}
+                `}
+                >
+                  {feature.status === "coming"
+                    ? t("future.comingSoon")
+                    : t("future.planned")}
                 </div>
 
                 <motion.div
                   className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 p-3 mb-4"
                   animate={{
                     boxShadow: [
-                      '0 0 0 hsl(var(--primary) / 0)',
-                      '0 0 20px hsl(var(--primary) / 0.3)',
-                      '0 0 0 hsl(var(--primary) / 0)',
+                      "0 0 0 hsl(var(--primary) / 0)",
+                      "0 0 20px hsl(var(--primary) / 0.3)",
+                      "0 0 0 hsl(var(--primary) / 0)",
                     ],
                   }}
-                  transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    delay: index * 0.5,
+                  }}
                 >
                   <feature.icon className="w-full h-full text-primary" />
                 </motion.div>
@@ -123,9 +138,10 @@ const FutureSection = () => {
                   <motion.div
                     className="absolute inset-0"
                     style={{
-                      background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent)',
+                      background:
+                        "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent)",
                     }}
-                    animate={{ x: ['-100%', '100%'] }}
+                    animate={{ x: ["-100%", "100%"] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
                 </motion.div>
@@ -142,7 +158,7 @@ const FutureSection = () => {
             whileTap={{ scale: 0.95 }}
           >
             <Sparkles className="w-4 h-4" />
-            Get Early Access
+            {t("future.earlyAccess")}
           </motion.button>
         </ScrollReveal>
       </div>

@@ -2,14 +2,24 @@ import { motion } from "framer-motion";
 import { Leaf, ArrowRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScrollReveal from "../ScrollReveal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CTASection = () => {
+  const { t } = useLanguage();
+
+  const stats = [
+    { value: t("cta.stat1Value"), label: t("cta.stat1Label") },
+    { value: t("cta.stat2Value"), label: t("cta.stat2Label") },
+    { value: t("cta.stat3Value"), label: t("cta.stat3Label") },
+    { value: t("cta.stat4Value"), label: t("cta.stat4Label") },
+  ];
+
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background - bright green farmland gradient */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/10 to-primary/20" />
-        
+
         {/* Animated particles */}
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -37,7 +47,8 @@ const CTASection = () => {
       <motion.div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.2) 0%, transparent 60%)',
+          background:
+            "radial-gradient(ellipse at center, hsl(var(--primary) / 0.2) 0%, transparent 60%)",
         }}
         animate={{
           opacity: [0.5, 0.8, 0.5],
@@ -53,23 +64,22 @@ const CTASection = () => {
           >
             <Leaf className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-foreground">
-              Ready to Transform Agriculture
+              {t("cta.badge")}
             </span>
           </motion.div>
         </ScrollReveal>
 
         <ScrollReveal delay={0.1}>
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold font-display mb-8">
-            <span className="text-foreground">Let schemes find </span>
+            <span className="text-foreground">{t("cta.heading1")}</span>
             <br />
-            <span className="text-gradient">the farmer.</span>
+            <span className="text-gradient">{t("cta.heading2")}</span>
           </h2>
         </ScrollReveal>
 
         <ScrollReveal delay={0.2}>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12">
-            GriTech OS transforms government schemes from static PDFs 
-            into a living digital experience for India's farmers.
+            {t("cta.subtitle")}
           </p>
         </ScrollReveal>
 
@@ -82,7 +92,7 @@ const CTASection = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="relative z-10 flex items-center gap-3">
-                  Enter GriTech OS
+                  {t("cta.button1")}
                   <motion.span
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -99,7 +109,7 @@ const CTASection = () => {
               whileTap={{ scale: 0.98 }}
             >
               <Play className="w-5 h-5" />
-              Watch How It Works
+              {t("cta.button2")}
             </motion.button>
           </div>
         </ScrollReveal>
@@ -107,14 +117,9 @@ const CTASection = () => {
         {/* Stats */}
         <ScrollReveal delay={0.4} className="mt-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {[
-              { value: "2000+", label: "Schemes Indexed" },
-              { value: "28", label: "States Covered" },
-              { value: "12", label: "Languages" },
-              { value: "100%", label: "Free Access" },
-            ].map((stat, index) => (
+            {stats.map((stat, index) => (
               <motion.div
-                key={stat.label}
+                key={index}
                 className="text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
