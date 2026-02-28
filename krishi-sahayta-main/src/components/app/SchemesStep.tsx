@@ -4,7 +4,7 @@ import {
   CheckCircle, ChevronDown, ExternalLink,
   HelpCircle, Download, Share2, Star, RefreshCw, X, Globe, Loader2, UserCog
 } from "lucide-react";
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { MatchedScheme } from "@/lib/schemeEngine";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import FloatingCard from "../FloatingCard";

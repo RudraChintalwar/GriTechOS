@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AppNavbar from "@/components/app/AppNavbar";
 import ProfileStep from "@/components/app/ProfileStep";
 import MatchingStep from "@/components/app/MatchingStep";
@@ -11,19 +11,11 @@ import { matchSchemes, MatchedScheme } from "@/lib/schemeEngine";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { db } from "@/lib/firebase";
-import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs, addDoc } from "firebase/firestore";
 import { toast } from "sonner";
+import { FarmerProfile } from "@/types";
 
-export interface FarmerProfile {
-  district: string;
-  farmerType: string;
-  landOwnership: string;
-  landSize: number;
-  crops: string[];
-  requirements: string[];
-}
-
-const Dashboard = () => {
+const SchemeSearch = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
 
@@ -116,11 +108,26 @@ const Dashboard = () => {
     }
 
     // Run real rule-based matching
-    setTimeout(() => {
+    setTimeout(async () => {
       const results = matchSchemes(data, allSchemes, language);
       setIsMatching(false);
       setMatchedSchemes(results);
       setCurrentStep(3);
+
+      // Save search history to Firestore
+      if (user) {
+        try {
+          await addDoc(collection(db, "users", user.uid, "searchHistory"), {
+            criteria: data,
+            resultCount: results.length,
+            topSchemes: results.slice(0, 3).map(s => s.name),
+            topSchemeIds: results.slice(0, 3).map(s => s.scheme_id),
+            timestamp: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.error("Error saving search history:", err);
+        }
+      }
     }, 2500);
   };
 
@@ -204,4 +211,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default SchemeSearch;

@@ -19,7 +19,7 @@ import {
     Loader2
 } from "lucide-react";
 import districtTranslations, { getDistrictName } from "@/i18n/districtTranslations";
-import { FarmerProfile } from "./Dashboard";
+import { FarmerProfile } from "@/types";
 
 const ProfilePage = () => {
     const { t, language } = useLanguage();
@@ -89,7 +89,7 @@ const ProfilePage = () => {
                 updatedAt: new Date().toISOString()
             }, { merge: true });
             toast.success(t("profile.updateProfileDesc") || "Profile updated successfully!");
-            navigate(-1);
+            navigate("/app");
         } catch (error) {
             console.error("Error saving profile:", error);
             toast.error("Failed to save profile. Please try again.");
@@ -118,7 +118,7 @@ const ProfilePage = () => {
                 >
                     <div>
                         <button
-                            onClick={() => navigate(-1)}
+                            onClick={() => navigate("/app")}
                             className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />

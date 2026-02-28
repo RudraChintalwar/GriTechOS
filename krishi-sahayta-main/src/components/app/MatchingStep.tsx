@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Brain, Zap, CheckCircle, Database, Search } from "lucide-react";
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MatchingStepProps {

@@ -1,4 +1,4 @@
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { MatchedScheme } from "@/lib/schemeEngine";
 import { Language } from "@/contexts/LanguageContext";
 

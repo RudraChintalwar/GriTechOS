@@ -8,9 +8,11 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
+import UserDashboard from "./pages/UserDashboard";
+import SchemeSearch from "./pages/SchemeSearch";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
+import HistoryResults from "./pages/HistoryResults";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -34,7 +36,23 @@ const App = () => (
                 path="/app"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/app/search"
+                element={
+                  <ProtectedRoute>
+                    <SchemeSearch />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/app/history/:id"
+                element={
+                  <ProtectedRoute>
+                    <HistoryResults />
                   </ProtectedRoute>
                 }
               />

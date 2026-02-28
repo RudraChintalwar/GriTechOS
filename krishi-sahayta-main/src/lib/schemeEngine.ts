@@ -1,5 +1,5 @@
 import { SchemeData, cropMapping, requirementCategoryMapping } from "@/data/schemesData";
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { Language } from "@/contexts/LanguageContext";
 
 export interface MatchedScheme {
@@ -20,7 +20,7 @@ export interface MatchedScheme {
  * Resolve translated fields for a scheme.
  * Uses the embedded i18n object from Firestore, falling back to raw fields.
  */
-function resolveI18n(scheme: SchemeData, lang: Language) {
+export function resolveI18n(scheme: SchemeData, lang: Language) {
     const i18n = scheme.i18n;
     if (i18n && i18n[lang]) {
         return i18n[lang]!;

@@ -41,7 +41,7 @@ const AppNavbar = ({ currentStep, steps }: AppNavbarProps) => {
         <div className="flex items-center justify-between">
           {/* Back button & Logo */}
           <div className="flex items-center gap-4">
-            <Link to="/">
+            <Link to="/app">
               <motion.div
                 className="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                 whileHover={{ scale: 1.05 }}
@@ -51,9 +51,9 @@ const AppNavbar = ({ currentStep, steps }: AppNavbarProps) => {
               </motion.div>
             </Link>
 
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-accent flex items-center justify-center">
-                <Leaf className="w-4 h-4 text-primary-foreground" />
+            <Link to="/app" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <Leaf className="w-4 h-4 text-white" />
               </div>
               <span className="font-bold font-display text-foreground hidden sm:block">
                 GriTech OS

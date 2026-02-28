@@ -142,7 +142,7 @@ const HeroSection = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
           >
             <motion.button
-              onClick={() => navigate("/app")}
+              onClick={() => navigate(user ? "/app" : "/auth")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               className="btn-hero group"

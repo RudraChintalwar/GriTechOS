@@ -4,7 +4,7 @@ import {
   X, Send, Mic, MicOff,
   Sparkles, Bot, ChevronRight,
 } from "lucide-react";
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Structured response types ──────────────────────────
@@ -277,6 +277,7 @@ const ChatAssistant = ({ schemes, profile }: ChatAssistantProps) => {
     <>
       {/* Floating orb button */}
       <motion.button
+        data-chat-trigger
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 z-50 ${isOpen ? "hidden" : "flex"}`}
         whileHover={{ scale: 1.1 }}

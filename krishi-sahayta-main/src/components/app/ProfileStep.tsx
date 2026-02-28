@@ -5,7 +5,7 @@ import {
   CreditCard, Home, Users, ChevronRight, Wheat,
   Leaf, CircleDot, AlertTriangle,
 } from "lucide-react";
-import { FarmerProfile } from "@/pages/Dashboard";
+import { FarmerProfile } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import FloatingCard from "../FloatingCard";
 import { toast } from "sonner";

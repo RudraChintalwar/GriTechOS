@@ -3,9 +3,11 @@ import { Leaf, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScrollReveal from "../ScrollReveal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CTASection = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <section className="relative py-32 overflow-hidden">
@@ -77,7 +79,7 @@ const CTASection = () => {
 
         <ScrollReveal delay={0.3}>
           <div className="flex items-center justify-center">
-            <Link to="/app">
+            <Link to={user ? "/app" : "/auth"}>
               <motion.button
                 className="btn-hero group text-lg"
                 whileHover={{ scale: 1.05 }}
